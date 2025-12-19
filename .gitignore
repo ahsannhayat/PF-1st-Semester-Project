@@ -1,0 +1,44 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake Build Folder (CRITICAL)
+build/
+cmake-build-debug/
+dist/
+
+# VS Code Settings (Optional: remove if you want to share workspace settings)
+.vscode/
+
+# OS Generated files
+.DS_Store
+Thumbs.db
