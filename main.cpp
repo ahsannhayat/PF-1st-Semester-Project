@@ -1,15 +1,105 @@
 #include <iostream>
-#include <cstdio>
+#include <cstdlib>              // for rand() and srand()
 #include <time.h>
 #include <SFML/Graphics.hpp>   //included SFML library
-#include <optional>
+#include <optional>            // for event handling
+#include<fstream>
+#include <cassert>             // for cassert
 
 using namespace sf;           // required to use SFML libraray
 using namespace std;
+
+// Structure to hold player statistics
+struct Player 
+{
+    string name;
+    int gamesPlayed = 0;
+    int gamesWon = 0;
+};
+ 
+// Function to load player statistics from a file
+void saveStats(Player p)
+{
+    ofstream fout("stats.txt"); // Opens file to WRITE
+     
+    assert(fout.is_open()); // Ensure file is open
+
+        fout << p.name << endl;
+        fout << p.gamesPlayed << endl;
+        fout << p.gamesWon << endl;
+        fout.close();
+    
+}
+
+// Function to load player statistics from a file
+Player loadStats() 
+{
+    Player p;
+    ifstream fin("stats.txt"); // Opens file to READ
+    if (fin.is_open()) 
+    {
+        getline(fin, p.name);
+        fin >> p.gamesPlayed;
+        fin >> p.gamesWon;
+        fin.close();
+    } 
+    else 
+    {
+        // Default if no file exists
+        p.name = "Guest";
+        p.gamesPlayed = 0;
+        p.gamesWon = 0;
+    }
+    return p;
+}
+
 int main()
 {
-
     srand(time(0));
+
+    Player currentPlayer = loadStats();     // Load existing player stats or create new
+
+    // MENU LOOP
+    while (true) 
+    {
+        // Clear terminal and show Menu
+        system("cls"); 
+        cout << "===========================" << endl;
+        cout << "   MINESWEEPER ULTIMATE    " << endl;
+        cout << "===========================" << endl;
+        cout << "Welcome back, " << currentPlayer.name << "!" << endl;
+        cout << "1. Play Game" << endl;
+        cout << "2. View Stats" << endl;
+        cout << "3. Change Name" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Choose option: ";
+        
+        int choice;
+        cin >> choice;
+
+        if (choice == 4) break; // Exit the program
+
+        if (choice == 3) {
+            cout << "Enter new name: ";
+            cin >> currentPlayer.name;
+            saveStats(currentPlayer);
+            continue; // Go back to top of menu
+        }
+
+        if (choice == 2) {
+            cout << "\n--- PLAYER STATS ---" << endl;
+            cout << "Name:   " << currentPlayer.name << endl;
+            cout << "Played: " << currentPlayer.gamesPlayed << endl;
+            cout << "Won:    " << currentPlayer.gamesWon << endl;
+            cout << "\nPress Enter to return...";
+            cin.ignore(); cin.get(); // Pause
+            continue;
+        }
+
+        if (choice == 1) {
+            // --- START GAME LOGIC ---
+            currentPlayer.gamesPlayed++;
+            saveStats(currentPlayer);
 
     const int gridSize = 12;     // 12 x 12 board
     const int tileSize = 32;    // pixels per tile
@@ -66,7 +156,7 @@ int main()
             grid[i][j] = n;   // set the count of adjacent mines (if 3)
         }
 
-    
+    bool isGameOver = false;
     // Game Loop
    while (game.isOpen())
     {
@@ -77,6 +167,14 @@ int main()
             if (event->is<Event::Closed>())
                 game.close();
 
+                if (isGameOver)
+        {
+        // If game is ended, wait for any click or key to exit back to menu
+        if (event->getIf<Event::MouseButtonPressed>() || event->getIf<Event::KeyPressed>())
+            {
+                game.close(); 
+            }
+        }
             // Mouse Clicks
             if (const auto* mousePress = event->getIf<Event::MouseButtonPressed>())
             {
@@ -96,6 +194,7 @@ int main()
                         if (grid[x+1][y+1] == 9) 
                         {
                             cout << "BOOM! Game Over!" << endl;
+                            cout << "Click anywhere to return to menu..." << endl;
                             for (int i = 1; i <= 10; i++)
                                 for (int j = 1; j <= 10; j++)
                                     sgrid[i][j] = grid[i][j];
@@ -135,7 +234,9 @@ int main()
         }
 
         game.display();
-        
+    }
+            // --- END GAME LOGIC ---
+}
 }
     return 0;
 }
